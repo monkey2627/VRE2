@@ -1,0 +1,235 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="物理仿真">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="物理仿真\gpu">
+      <UniqueIdentifier>{d93eeefc-f354-450f-a19a-b93e5be835a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="图形绘制">
+      <UniqueIdentifier>{c2aa0af1-8c81-4235-a6bd-1929bbf4c7b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="图形绘制\gl">
+      <UniqueIdentifier>{f1a651a5-63c3-4473-bf70-8bea8c3a91e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="图形绘制\core">
+      <UniqueIdentifier>{ef139799-315e-4a1c-802b-2416cc47e74f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="力反馈">
+      <UniqueIdentifier>{74411fe7-e607-45d5-ac06-8e595b9cea13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="通用">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SoftSim\gpu\gpufun.h">
+      <Filter>物理仿真\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\gpu\gpuvar.h">
+      <Filter>物理仿真\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\Solver.h">
+      <Filter>物理仿真</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\demoContext.h">
+      <Filter>图形绘制</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\imgui.h">
+      <Filter>图形绘制</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\shaders.h">
+      <Filter>图形绘制</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\shadersDemoContext.h">
+      <Filter>图形绘制</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\stb_truetype.h">
+      <Filter>图形绘制</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\opengl\demoContextOGL.h">
+      <Filter>图形绘制\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\opengl\imguiRenderGL.h">
+      <Filter>图形绘制\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\opengl\shader.h">
+      <Filter>图形绘制\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\opengl\utilsGL.h">
+      <Filter>图形绘制\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\core.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\extrude.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\mat22.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\mat33.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\mat44.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\maths.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\matnn.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\mesh.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\platform.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\png.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\point3.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\quat.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\types.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\vec2.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\vec3.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\opengl\core\vec4.h">
+      <Filter>图形绘制\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\HapticDevice.h">
+      <Filter>力反馈</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\virtual_coupling\calculate.h">
+      <Filter>力反馈</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\logger.h">
+      <Filter>通用</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\mat44.h">
+      <Filter>通用</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\virtual_coupling\utils.h">
+      <Filter>通用</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\manager.h">
+      <Filter>通用</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\virtual_coupling\typedefs.h">
+      <Filter>通用</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\bridge.h">
+      <Filter>通用</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftSim\virtual_coupling\haptic.h">
+      <Filter>力反馈</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="SoftSim\Solver.cpp">
+      <Filter>物理仿真</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\SolverInit.cpp">
+      <Filter>物理仿真</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\SoftObjectFile.cpp">
+      <Filter>物理仿真</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\SolverFile.cpp">
+      <Filter>物理仿真</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\opengl\imgui.cpp">
+      <Filter>图形绘制</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\opengl\gl.cpp">
+      <Filter>图形绘制</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\opengl\shadersDemoContext.cpp">
+      <Filter>图形绘制</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\opengl\opengl\imguiRenderGL.cpp">
+      <Filter>图形绘制\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\opengl\opengl\shader.cpp">
+      <Filter>图形绘制\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\opengl\opengl\shadersGL.cpp">
+      <Filter>图形绘制\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\opengl\core\core.cpp">
+      <Filter>图形绘制\core</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\opengl\core\extrude.cpp">
+      <Filter>图形绘制\core</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\opengl\core\maths.cpp">
+      <Filter>图形绘制\core</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\opengl\core\mesh.cpp">
+      <Filter>图形绘制\core</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\opengl\core\platform.cpp">
+      <Filter>图形绘制\core</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\opengl\core\png.cpp">
+      <Filter>图形绘制\core</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\SolverFileStream.cpp">
+      <Filter>物理仿真</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\HapticDevice.cpp">
+      <Filter>力反馈</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\virtual_coupling\calculate.cpp">
+      <Filter>力反馈</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\logger.cpp">
+      <Filter>通用</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\main.cpp">
+      <Filter>通用</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\virtual_coupling\utils.cpp">
+      <Filter>通用</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\manager.cpp">
+      <Filter>通用</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftSim\virtual_coupling\haptic.cpp">
+      <Filter>力反馈</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="SoftSim\gpu\tet.cu">
+      <Filter>物理仿真\gpu</Filter>
+    </CudaCompile>
+    <CudaCompile Include="SoftSim\gpu\mesh.cu">
+      <Filter>物理仿真\gpu</Filter>
+    </CudaCompile>
+    <CudaCompile Include="SoftSim\gpu\spring.cu">
+      <Filter>物理仿真\gpu</Filter>
+    </CudaCompile>
+    <CudaCompile Include="SoftSim\gpu\collision.cu">
+      <Filter>物理仿真\gpu</Filter>
+    </CudaCompile>
+    <CudaCompile Include="SoftSim\gpu\grab.cu">
+      <Filter>物理仿真\gpu</Filter>
+    </CudaCompile>
+    <CudaCompile Include="SoftSim\gpu\var.cu">
+      <Filter>物理仿真\gpu</Filter>
+    </CudaCompile>
+  </ItemGroup>
+</Project>
