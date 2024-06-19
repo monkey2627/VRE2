@@ -41,6 +41,7 @@ float l2_dis(float* p0, float* p1, unsigned int dim = 3)
 
 int g_unityID;
 
+// 把(x, y, z)附近 r 范围内的弹簧顶点固定.
 void Solver::AddFixedPoint(float x, float y, float z, float r)
 {
 	float q[3] = { x, y, z };
@@ -50,9 +51,13 @@ void Solver::AddFixedPoint(float x, float y, float z, float r)
 		p[0] = m_tetVertPos[i * 3 + 0];
 		p[1] = m_tetVertPos[i * 3 + 1];
 		p[2] = m_tetVertPos[i * 3 + 2];
-		if (l2_dis(p, q) < r)
+		if (l2_dis(p, q) < r)  // 被锁定了，在上半部分..
 		{
 			m_tetVertFixed[i] = 1e9;
+			m_tetUpperIndex.push_back(i);
+		}
+		else {
+			m_tetLowerIndex.push_back(i);
 		}
 	}
 	printf("\t\tSurfaceVertNum:%d\n", GetSurfaceVertNum());
@@ -96,7 +101,12 @@ void Solver::SolverInit() {
 		{
 			printf("AddFixedPoint two-objects\n");
 			AddFixedPoint(0, 3.75, 0, 4.4);
+
+			// printf("upper: %d, lower: %d\n\n", m_tetUpperIndex.size(), m_tetLowerIndex.size());
 		}
+		// Add extra spring...
+		AddExtraSpring();
+
 		WriteToBin();
 	}
 	else {
@@ -113,6 +123,34 @@ void Solver::SolverInit() {
 	PreMalloc();
 	CopyToGPU();
 
+}
+
+void Solver::AddExtraSpring() {
+	int springCount = min(m_tetUpperIndex.size(), m_tetLowerIndex.size());
+	for (int i = 0; i < springCount; i++) {
+		int upperIdx = m_tetUpperIndex[i];
+		int lowerIdx = m_tetLowerIndex[i];
+
+		m_tetSpringIndex.push_back(upperIdx);
+		m_tetSpringIndex.push_back(lowerIdx);
+
+		float pos0x = m_tetVertPos[upperIdx * 3 + 0];
+		float pos0y = m_tetVertPos[upperIdx * 3 + 1];
+		float pos0z = m_tetVertPos[upperIdx * 3 + 2];
+		float pos1x = m_tetVertPos[lowerIdx * 3 + 0];
+		float pos1y = m_tetVertPos[lowerIdx * 3 + 1];
+		float pos1z = m_tetVertPos[lowerIdx * 3 + 2];
+
+		float dx = pos0x - pos1x;
+		float dy = pos0y - pos1y;
+		float dz = pos0z - pos1z;
+		float orgLen = sqrt(dx * dx + dy * dy + dz * dz);
+
+		m_tetSpringOrgLength.push_back(orgLen);
+		m_tetSpringStiffness.push_back(tetSpringStiffnessDefault);
+
+		printf("Added extra spring between upperIdx:%d and lowerIdx:%d with original length: %f\n", upperIdx, lowerIdx, orgLen);
+	}
 }
 
 

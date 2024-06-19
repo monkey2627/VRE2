@@ -23,8 +23,8 @@ public:
 	int m_iterateNum=12;
 	float volumnStiffness=1000.0f;
 
-	bool m_useTetEdgeSpring = false;
-	float tetSpringStiffnessDefault = 1000.0f;
+	bool m_useTetEdgeSpring = true;
+	float tetSpringStiffnessDefault = 10.0f;
 	bool m_useClusterCollision = false;
 	float collisionStiffness=1500.0f;
 	float connectStiffness=1000.0f;
@@ -70,6 +70,10 @@ public:
 	std::vector<int> m_triUVIndexOrg;// 细分三角形索引
 	std::vector<float> m_triUVOrg; // 细分三角网格表面顶点坐标
 	std::vector<float> m_triVertfromTetStiffness;
+
+	// 区分上下半的弹簧索引...
+	std::vector<int> m_tetUpperIndex;
+	std::vector<int> m_tetLowerIndex;
 
 	///圆柱体
 	int m_cylinderNum = 1;
@@ -156,6 +160,7 @@ public:
 	int GetOrgTriVertNum(void);
 	int GetSpringNum(void);
 
+	void AddExtraSpring();
 	void InitSpringConstraint();
 	void InitVolumeConstraint();
 	void SurfaceSubdivision();

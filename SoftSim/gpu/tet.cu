@@ -184,7 +184,7 @@ __global__ void calculateTetEdgeSpringConstraint(
 	float dz = pos0z - pos1z;
 
 	float length = sqrt(dx * dx + dy * dy + dz * dz);
-	if (length < springOrigin[threadid]) return;
+	// if (length < springOrigin[threadid]) return;  ÒýÈë³âÁ¦£¡
 	dx = dx * (springOrigin[threadid] / length);
 	dy = dy * (springOrigin[threadid] / length);
 	dz = dz * (springOrigin[threadid] / length);
