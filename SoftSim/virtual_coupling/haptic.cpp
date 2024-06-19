@@ -64,6 +64,8 @@ void Haptic::SetQH(const float* toolTrans)
 	m_dir_h[2] = dir_h.z();
 
 	memcpy(m_hapticToolTrans.data(), toolTrans, 16 * sizeof(float));
+
+	m_button_pressed = toolTrans[18];
 }
 
 void Haptic::HapticCollision(CollisionMode mode)
@@ -116,6 +118,12 @@ void Haptic::HapticStep() // 以1000Hz运行
 
 	//清除碰撞信息
 	runClearCollisionMU();
+
+	if (m_button_pressed > 0)
+	{
+		// 此处执行按键按下的操作
+		cout << "button pressed" << endl;
+	}
 
 	QueryPerformanceFrequency(&qg_NFreq);
 	QueryPerformanceCounter(&qg_T1);
@@ -307,7 +315,7 @@ void Haptic::ComputeLeftToolForce(const float* trans, double* force)
 	force[2] = -F_vc[2];
 	//float forceLen = sqrt(F_vc[0] * F_vc[0] + F_vc[1] * F_vc[1] + F_vc[2] * F_vc[2]);
 	//printf("force len:%f\n", forceLen);
-
+	
 	QueryPerformanceCounter(&hapticT2);
 
 	m_hapticStepOpTime = (hapticT2.QuadPart - hapticT1.QuadPart) / (double)hapticNFreq.QuadPart;

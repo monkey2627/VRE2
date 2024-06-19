@@ -16,6 +16,7 @@ public:
 
 	std::vector<float> m_hapticToolTrans;
 	std::vector<float> m_virtualToolTrans;
+	int m_button_pressed = 0;
 
 	float m_kVc = 5;
 	float m_kc = 10;
