@@ -91,6 +91,7 @@ mat3 calculator::calculatePartialFVC_Omega()
 	return result;
 }
 
+// 根据实际工具和虚拟工具间的距离，把力反馈的力映射到(0, 力反馈最大力)；r超过阈值r_lin后指数上升.
 ValType calculator::saturationMapping(ValType r)
 {
 	ValType result;
@@ -177,8 +178,8 @@ mat3 calculator::genTildeMatrix(vec3 r)
 vec3 calculator::calculateToolDir(vec3 Omega)
 {
 	Quaterniond q = Omega2Quaternion(Omega);
-	mat3 rot = q.toRotationMatrix();
-	vec3 dir(0, 0, 1);
+	mat3 rot = q.toRotationMatrix();  // 旋转矩阵，相当于工具局部坐标系->世界
+	vec3 dir(0, 0, 1);  // 工具的局部坐标系下，方向是0,0,1
 	return rot * dir;
 }
 
@@ -360,10 +361,11 @@ mat3 calculator::SkewSymmetricMatrix(vec3 v)
 	return m;
 }
 
+// FVC可能是根据虚拟工具和实际工具的位置差异，对实际工具施加力防止跑太快.
 vec3 calculator::calculateFVC(vec3 Xg, vec3 Xh)
 {
 	double r = l2dis(Xg, Xh);
-	vec3 e_r;
+	vec3 e_r;   // er 是点xg, xh之间的距离.
 	if (r > EPS)// 避免除零错误
 		e_r = (Xg - Xh) / r;
 	else

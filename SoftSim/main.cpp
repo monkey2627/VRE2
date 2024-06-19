@@ -24,6 +24,7 @@ void PDInit()
 	g_useHapticDevice = true;
 }
 
+// QG是虚拟工具，QH是力反馈设备的实际位姿.
 void PDUpdate()
 {
 	float dt = 1.8f / 60.0f;

@@ -185,15 +185,15 @@ void Haptic::UpdateQG()
 	using namespace Eigen;
 	// calculate partial F_vc
 	float t[9];
-	cudaMemcpy(t, totalPartial_FC_X_d, 9 * sizeof(float), cudaMemcpyDeviceToHost);
-	mat3 partial_Fc;
+	cudaMemcpy(t, totalPartial_FC_X_d, 9 * sizeof(float), cudaMemcpyDeviceToHost);  // 力对xyz位置求偏导，这是个雅各比矩阵
+	mat3 partial_Fc;    // partial_FC就是力对位置xyz的偏导矩阵.
 	partial_Fc << t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8];
 	float fc[3];
-	cudaMemcpy(fc, totalFC_d, 3 * sizeof(float), cudaMemcpyDeviceToHost);
+	cudaMemcpy(fc, totalFC_d, 3 * sizeof(float), cudaMemcpyDeviceToHost);           // 虚拟工具收到的力
 	printCudaError("Fc copy");
 
 	int collisionNum;
-	cudaMemcpy(&collisionNum, hapticCollisionNum_d, sizeof(int), cudaMemcpyDeviceToHost);
+	cudaMemcpy(&collisionNum, hapticCollisionNum_d, sizeof(int), cudaMemcpyDeviceToHost);  // 碰撞总数.
 	//printf("collisionNum: %d\n", collisionNum);
 	printCudaError("collisionNum copy error");
 
@@ -201,21 +201,21 @@ void Haptic::UpdateQG()
 	Fc << fc[0], fc[1], fc[2];
 	// calculate 引入eigen求解方程
 
-	vec3 Xh, Omega_h;
+	vec3 Xh, Omega_h;   // 实际工具的位置和角度
 	Xh << m_qh[0], m_qh[1], m_qh[2];
 	Omega_h << m_qh[3], m_qh[4], m_qh[5];
-	vec3 Xg, Omega_g;
+	vec3 Xg, Omega_g;   // 虚拟工具的位置和角度
 	Xg << m_qg[0], m_qg[1], m_qg[2];
 	Omega_g << m_qh[3], m_qh[4], m_qh[5];// 虚拟工具姿态与物理工具相同
 
 	vec3 tool_dir = m_virtualCoupling.calculateToolDir(Omega_g);
 	m_dir_g[0] = tool_dir.x();
 	m_dir_g[1] = tool_dir.y();
-	m_dir_g[2] = tool_dir.z();
+	m_dir_g[2] = tool_dir.z();  // m_dir_g，虚拟工具的朝向
 
 	auto delta_x = m_virtualCoupling.solve(Xh, Xg, Fc, partial_Fc, collisionNum);
 
-	m_qg[0] += delta_x[0];
+	m_qg[0] += delta_x[0];   // 更新虚拟工具的位置（根据受力情况）
 	m_qg[1] += delta_x[1];
 	m_qg[2] += delta_x[2];
 
