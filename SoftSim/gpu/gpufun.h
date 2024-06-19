@@ -251,10 +251,11 @@ __global__ void hapticCollisionSphere_Merge(float* ballPos, float radius,
 	float* toolDeltaPos, float* F_c, float* partialFc, float k_c, int* collisionNumPtr, int vertexNum);
 int runHapticCollisionSphere_Merged(float toolR, float p_collisionStiffness, float kc, int toolIdx);
 
+int runHapticCollisionCylinder_Merged_With_Sphere(float toolR, float param_toolLength, float p_collisionStiffness, float kc, int toolIdx, float sphere_R);
 int runHapticCollisionCylinder_Merged(float toolR, float toolLength, float p_collisionStiffness, float kc, int toolIdx);
 __global__ void hapticCollisionCylinder_Merge(
 	float* cylinderLastPos, float * cylinderPose,
-	float halfLength, float radius, float* triPositions,
+	float halfLength, float radius, float sphere_r, float* triPositions,
 	float* velocity, int* mapping, float* triForce,
 	float* triCollisionForce, float* triCollisionDiag, float* triInsertionDepth, float* triVertProjectedPos, float* tetVertForce,
 	float* tetVertCollisionForce, float* tetVertCollisionDiag, float* tetInsertionDepth, unsigned char* isCollide,
@@ -439,7 +440,7 @@ __device__ void updateTetIndex(int* tetIndex, unsigned int* tetDrawIndex, unsign
 __device__ bool edgeCut(float* pos0, float* pos1, float* toolPos, float* dirX, float* dirY, float* dirZ, float x, float z);
 
 __device__ bool cylinderCollision(float* pos, float* dir, float* vert, float length, float radius, float* t, float* collisionNormal, float* collisionPos);
-__device__ bool cylinderCollision_withDepth(float * pose, float* vert, float length, float radius, float* t, float* depth, float* distance, float* collisionNormal, float* collisionPos);
+__device__ bool cylinderCollision_withDepth(float * pose, float* vert, float length, float radius, float sphere_r, float* t, float* depth, float* distance, float* collisionNormal, float* collisionPos);
 
 //与自定义的obb包围盒进行碰撞检测（模拟抓钳抓取的范围）
 __device__ bool obbCollision(float posx, float posy, float posz, float dirXx, float dirXy, float dirXz, float dirYx, float dirYy, float dirYz, float dirZx, float dirZy, float dirZz,

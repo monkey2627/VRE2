@@ -1208,8 +1208,7 @@ int runHapticCollisionSphere_Merged(float toolR, float p_collisionStiffness, flo
 	return 0;
 }
 
-int runHapticCollisionCylinder_Merged(float toolR, float param_toolLength, float p_collisionStiffness, float kc, int toolIdx)
-{
+int runHapticCollisionCylinder_Merged_With_Sphere(float toolR, float param_toolLength, float p_collisionStiffness, float kc, int toolIdx, float sphere_R) {
 	int  threadNum = 512;
 	int blockNum = (triVertNum_d + threadNum - 1) / threadNum;
 
@@ -1217,7 +1216,7 @@ int runHapticCollisionCylinder_Merged(float toolR, float param_toolLength, float
 	// 碰撞检测核函数
 	hapticCollisionCylinder_Merge << <blockNum, threadNum >> > (
 		toolPosePrev_d, toolPositionAndDirection_d,
-		param_toolLength, toolR,
+		param_toolLength, toolR, sphere_R,
 		triVertPos_d, triVertVelocity_d, triVert2TetVertMapping_d,
 		triVertForce_d, triVertCollisionForce_d, triVertCollisionDiag_d, triVertInsertionDepth_d, triVertProjectedPos_d,
 		tetVertForce_d, tetVertCollisionForce_d, tetVertCollisionDiag_d, tetVertInsertionDepth_d,
@@ -1230,9 +1229,32 @@ int runHapticCollisionCylinder_Merged(float toolR, float param_toolLength, float
 	return 0;
 }
 
+int runHapticCollisionCylinder_Merged(float toolR, float param_toolLength, float p_collisionStiffness, float kc, int toolIdx)
+{
+	int  threadNum = 512;
+	int blockNum = (triVertNum_d + threadNum - 1) / threadNum;
+
+	float frictionStiffness = 10;
+	// 碰撞检测核函数
+	hapticCollisionCylinder_Merge << <blockNum, threadNum >> > (
+		toolPosePrev_d, toolPositionAndDirection_d,
+		param_toolLength, toolR, -1,
+		triVertPos_d, triVertVelocity_d, triVert2TetVertMapping_d,
+		triVertForce_d, triVertCollisionForce_d, triVertCollisionDiag_d, triVertInsertionDepth_d, triVertProjectedPos_d,
+		tetVertForce_d, tetVertCollisionForce_d, tetVertCollisionDiag_d, tetVertInsertionDepth_d,
+		triVertisCollide_d,
+		triVertNum_d, p_collisionStiffness, frictionStiffness,
+		triVertNonPenetrationDir_d, cylinderShift_d, hapticCollisionNum_d);
+
+	//cudaDeviceSynchronize();
+	printCudaError("HapticCollisionCylinderMerged");
+	return 0;
+}
+
+// sphere_R如果为负，认为没有球碰撞盒...
 __global__ void hapticCollisionCylinder_Merge(
 	float* cylinderLastPos, float * cylinderPose,
-	float halfLength, float radius, float* triPositions,
+	float halfLength, float radius, float sphere_r, float* triPositions,
 	float* velocity, int* mapping, float* triForce,
 	float* triCollisionForce, float* triCollisionDiag, float* triInsertionDepth, float* triVertProjectedPos, float* tetVertForce,
 	float* tetVertCollisionForce, float* tetVertCollisionDiag, float* tetInsertionDepth, unsigned char* isCollide,
@@ -1303,8 +1325,8 @@ __global__ void hapticCollisionCylinder_Merge(
 		float vert[3] = { triPositions[indexX], triPositions[indexY], triPositions[indexZ] };
 		float distance = -1;
 		bool collision = cylinderCollision_withDepth(cylinderPose, 
-			vert, halfLength, radius, 
-			&t, &depth, &distance, collisionNormal, collisionPos);
+			vert, halfLength, radius, sphere_r,
+			&t, &depth, &distance, collisionNormal, collisionPos);    // 判断这个点是否发生了碰撞. collisionPos是发生了碰撞后顶点应该去的地方...
 		if (!collision) return;
 	}
 
@@ -1316,7 +1338,7 @@ __global__ void hapticCollisionCylinder_Merge(
 	deltaPos[1] = collisionPos[1] - triPositions[indexY];
 	deltaPos[2] = collisionPos[2] - triPositions[indexZ];
 	float insertionDepth = sqrt(deltaPos[0] * deltaPos[0] + deltaPos[1] * deltaPos[1] + deltaPos[2] * deltaPos[2]);
-	triInsertionDepth[threadid] = insertionDepth;
+	triInsertionDepth[threadid] = insertionDepth;    // 插入深度..
 
 	// 根据碰撞计算接触力。
 	float temp[3];

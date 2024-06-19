@@ -2,6 +2,8 @@
 #include "calculate.h"
 class Haptic {
 public:
+	float m_sphereRadius = 0.5;    // Ìí¼ÓÇòÅö×²ºĞµÄ°ë¾¶..
+
 	float m_radius = 0.2;
 	float m_cylinderLength = 30;
 	float m_collisionStiffness = 2500;

@@ -102,7 +102,9 @@ void Haptic::HapticCollision(CollisionMode mode)
 	else if (mode == CYLINDER_MERGE_MODE)
 	{
 		// 碰撞检测
-		runHapticCollisionCylinder_Merged(m_radius, m_cylinderLength, m_collisionStiffness, m_kc, 0);
+		// runHapticCollisionCylinder_Merged(m_radius, m_cylinderLength, m_collisionStiffness, m_kc, 0);
+		// 在工具前面加个碰撞球.
+		runHapticCollisionCylinder_Merged_With_Sphere(m_radius, m_cylinderLength, m_collisionStiffness, m_kc, 0, m_sphereRadius);
 		// 根据碰撞结果计算工具上的接触力
 		runDeviceCalculateContact(m_kc);
 	}

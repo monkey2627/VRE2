@@ -1225,7 +1225,8 @@ __device__ bool cylinderCollision(float* pos, float* dir, float* vert, float len
 	return true;
 }
 
-__device__ bool cylinderCollision_withDepth(float * pose, float* vert, float length, float radius, float* t, float* depth, float* dist, float* collisionNormal, float* collisionPos)
+// 它只在 hapticCollisionCylinder_Merge 中被调用，可以改参数. sphere_r 为负数表示不考虑球碰撞盒.
+__device__ bool cylinderCollision_withDepth(float * pose, float* vert, float length, float radius, float sphere_r, float* t, float* depth, float* dist, float* collisionNormal, float* collisionPos)
 {
 	float cylinder0x, cylinder0y, cylinder0z;
 	cylinder0x = pose[0];
@@ -1240,27 +1241,53 @@ __device__ bool cylinderCollision_withDepth(float * pose, float* vert, float len
 	float cylinderdx = cylinder1x - cylinder0x;
 	float cylinderdy = cylinder1y - cylinder0y;
 	float cylinderdz = cylinder1z - cylinder0z;
-	float dx = vert[0] - cylinder0x;
+	float dx = vert[0] - cylinder0x;    // 和工具“头”的距离..?
 	float dy = vert[1] - cylinder0y;
 	float dz = vert[2] - cylinder0z;
 	*t = dir[0] * dx + dir[1] * dy + dir[2] * dz;
 
-	*t /= length;
+	*t /= length;   // 此后这个t是：vert在工具直线的投影点到工具头的长度，与总长度之比。小于0则在前面，大于1则在工具头“后面”
 	/*printf("tool len: %f\n", length);*/
-	if (*t < 0) {
+	if (*t < 0) {   // 如果sphere_r非负表示考虑球碰撞盒.
 		*t = 0;
 		*depth = 0;
-		// 注释下面的return, 在圆柱的两端添加圆球。胶囊体
-		//return false;
+		if (sphere_r >= 0) {
+			// 算工具头的球碰撞盒.
+			// 注释下面的return, 在圆柱的两端添加圆球。胶囊体
+			// 球心在 cylinder0 - dir * sphere_r.
+			float sphere_x = cylinder0x - dir[0] * sphere_r;
+			float sphere_y = cylinder0y - dir[1] * sphere_r;
+			float sphere_z = cylinder0z - dir[2] * sphere_r;
+			dx = vert[0] - sphere_x;
+			dy = vert[1] - sphere_y;
+			dz = vert[2] - sphere_z;
+			float distance = sqrt(dx * dx + dy * dy + dz * dz);
+			*dist = distance;
+			if (distance > sphere_r) return false;  // 大于半径，没有碰撞
+
+			collisionNormal[0] = dx / distance;
+			collisionNormal[1] = dy / distance;
+			collisionNormal[2] = dz / distance;
+
+			float d = sphere_r - distance;
+			collisionPos[0] = vert[0] + collisionNormal[0] * d;
+			collisionPos[1] = vert[1] + collisionNormal[1] * d;
+			collisionPos[2] = vert[2] + collisionNormal[2] * d;
+			//printf("collided, vert: %f %f %f, toolpos: %f %f %f dir: %f %f %f\nd: %f t%%: %f\n", vert[0], vert[1], vert[2], 
+			//	pose[0], pose[1], pose[2], dir[0], dir[1], dir[2], d, *t);
+			*depth = d;
+
+			return true;
+		}
 	}
 	else if (*t > 1) {
 		*t = 1;
 		*depth = 0;
 		// 注释下面的return, 在圆柱的两端添加圆球。胶囊体
-		//return false;
+		// return false;
 	}
 
-	dx = vert[0] - cylinder0x - (*t) * cylinderdx;
+	dx = vert[0] - cylinder0x - (*t) * cylinderdx;   // 从顶点指向工具头的向量 - 工具头到vert在工具直线投影点的向量, 得到从投影点指向顶点的向量，其长度即距离...
 	dy = vert[1] - cylinder0y - (*t) * cylinderdy;
 	dz = vert[2] - cylinder0z - (*t) * cylinderdz;
 
