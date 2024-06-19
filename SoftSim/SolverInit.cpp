@@ -127,7 +127,7 @@ void Solver::SolverInit() {
 
 void Solver::AddExtraSpring() {
 	int springCount = min(m_tetUpperIndex.size(), m_tetLowerIndex.size());
-	for (int i = 0; i < springCount; i++) {
+	for (int i = 0; i < (int)(springCount/5); i++) {
 		int upperIdx = m_tetUpperIndex[i];
 		int lowerIdx = m_tetLowerIndex[i];
 
@@ -149,7 +149,7 @@ void Solver::AddExtraSpring() {
 		m_tetSpringOrgLength.push_back(orgLen);
 		m_tetSpringStiffness.push_back(tetSpringStiffnessDefault);
 
-		printf("Added extra spring between upperIdx:%d and lowerIdx:%d with original length: %f\n", upperIdx, lowerIdx, orgLen);
+		// printf("Added extra spring between upperIdx:%d and lowerIdx:%d with original length: %f\n", upperIdx, lowerIdx, orgLen);
 	}
 }
 

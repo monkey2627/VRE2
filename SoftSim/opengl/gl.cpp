@@ -854,7 +854,7 @@ bool GLUpdate()
 
 void GLInit()
 {
-	g_toolMesh = ImportMesh(".\\data\\CoarseToothedGripper_Pivot.obj");
+	g_toolMesh = ImportMesh(".\\data\\CoarseToothedGripper_Pivot_with_Sphere.obj");
 
 	float region[16];
 
