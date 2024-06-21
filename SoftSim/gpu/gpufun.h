@@ -252,6 +252,7 @@ __global__ void hapticCollisionSphere_Merge(float* ballPos, float radius,
 int runHapticCollisionSphere_Merged(float toolR, float p_collisionStiffness, float kc, int toolIdx);
 
 int runHapticCollisionCylinder_Merged_With_Sphere(float toolR, float param_toolLength, float p_collisionStiffness, float kc, int toolIdx, float sphere_R);
+int runHapticCollisionCylinder_Merged_Grab(float toolR, float param_toolLength, float p_collisionStiffness, float kc, int toolIdx, float sphere_R);
 int runHapticCollisionCylinder_Merged(float toolR, float toolLength, float p_collisionStiffness, float kc, int toolIdx);
 __global__ void hapticCollisionCylinder_Merge(
 	float* cylinderLastPos, float * cylinderPose,
@@ -262,6 +263,17 @@ __global__ void hapticCollisionCylinder_Merge(
 	int vertexNum,
 	float collisionStiffness, float frictionStiffness, float* directDir,
 	float* cylinderShift, int* collisionNumPtr);
+
+__global__ void hapticCollisionCylinder_Merge_Grab(
+	float* cylinderLastPos, float* cylinderPose,
+	float halfLength, float radius, float sphere_r, float* triPositions,
+	float* velocity, int* mapping, float* triForce,
+	float* triCollisionForce, float* triCollisionDiag, float* triInsertionDepth, float* triVertProjectedPos, float* tetVertForce,
+	float* tetVertCollisionForce, float* tetVertCollisionDiag, float* tetInsertionDepth, unsigned char* isCollide,
+	int vertexNum,
+	float collisionStiffness, float frictionStiffness, float* directDir,
+	float* cylinderShift, int* collisionNumPtr);
+
 int runDeviceCalculateContact(float k_c);
 __global__ void CalculateContact(float* nonPenetrationDirection, float* triVertPosition, float* projectedPosition, float* insertionDepth,
 	float* toolPose, float* toolDeltaPos,

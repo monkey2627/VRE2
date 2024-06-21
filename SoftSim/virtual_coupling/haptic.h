@@ -10,7 +10,7 @@ public:
 	float m_dampingForTriVert = 0.2f;
 	float m_rho = 0.9992f;
 	calculator m_virtualCoupling;
-	enum CollisionMode { TETVERT_MODE, TRIVERT_MODE, MERGE_MODE, CYLINDER_MERGE_MODE };
+	enum CollisionMode { TETVERT_MODE, TRIVERT_MODE, MERGE_MODE, CYLINDER_MERGE_MODE, GRAB_MODE };
 	std::vector<float> m_qg; // 6-dim [x, y, z, OmegaX, OmegaY, OmegaZ]
 	std::vector<float> m_qh; // 6-dim [x, y, z, OmegaX, OmegaY, OmegaZ]
 	std::vector<float> m_dir_g;

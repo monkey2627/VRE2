@@ -1209,7 +1209,7 @@ int runHapticCollisionSphere_Merged(float toolR, float p_collisionStiffness, flo
 }
 
 int runHapticCollisionCylinder_Merged_With_Sphere(float toolR, float param_toolLength, float p_collisionStiffness, float kc, int toolIdx, float sphere_R) {
-	int  threadNum = 512;
+	int threadNum = 512;
 	int blockNum = (triVertNum_d + threadNum - 1) / threadNum;
 
 	float frictionStiffness = 10;
@@ -1226,6 +1226,27 @@ int runHapticCollisionCylinder_Merged_With_Sphere(float toolR, float param_toolL
 
 	//cudaDeviceSynchronize();
 	printCudaError("HapticCollisionCylinderMerged");
+	return 0;
+}
+
+int runHapticCollisionCylinder_Merged_Grab(float toolR, float param_toolLength, float p_collisionStiffness, float kc, int toolIdx, float sphere_R) {
+	int threadNum = 512;
+	int blockNum = (triVertNum_d + threadNum - 1) / threadNum;
+
+	float frictionStiffness = 10;
+	// 碰撞检测核函数
+	hapticCollisionCylinder_Merge_Grab << <blockNum, threadNum >> > (
+		toolPosePrev_d, toolPositionAndDirection_d,
+		param_toolLength, toolR, sphere_R,
+		triVertPos_d, triVertVelocity_d, triVert2TetVertMapping_d,
+		triVertForce_d, triVertCollisionForce_d, triVertCollisionDiag_d, triVertInsertionDepth_d, triVertProjectedPos_d,
+		tetVertForce_d, tetVertCollisionForce_d, tetVertCollisionDiag_d, tetVertInsertionDepth_d,
+		triVertisCollide_d,
+		triVertNum_d, p_collisionStiffness, frictionStiffness,
+		triVertNonPenetrationDir_d, cylinderShift_d, hapticCollisionNum_d);
+
+	//cudaDeviceSynchronize();
+	printCudaError("HapticCollisionCylinderGrab");
 	return 0;
 }
 
@@ -1375,6 +1396,135 @@ __global__ void hapticCollisionCylinder_Merge(
 	isCollide[threadid] = 1;
 	atomicAdd(collisionNumPtr, 1);
 }
+
+__global__ void hapticCollisionCylinder_Merge_Grab(
+	float* cylinderLastPos, float* cylinderPose,
+	float halfLength, float radius, float sphere_r, float* triPositions,
+	float* velocity, int* mapping, float* triForce,
+	float* triCollisionForce, float* triCollisionDiag, float* triInsertionDepth, float* triVertProjectedPos, float* tetVertForce,
+	float* tetVertCollisionForce, float* tetVertCollisionDiag, float* tetInsertionDepth, unsigned char* isCollide,
+	int vertexNum,
+	float collisionStiffness, float frictionStiffness, float* directDir,
+	float* cylinderShift, int* collisionNumPtr)
+{
+	unsigned int threadid = blockIdx.x * blockDim.x + threadIdx.x;
+	if (threadid >= vertexNum) return;
+	//if(threadid==100)
+	//	printf("dir: %f %f %f\n", cylinderPose[3], cylinderPose[4], cylinderPose[5]);
+	float t = 0.0;
+	float depth = 0.0;
+	float solution = 0.0;
+
+	float collisionNormal[3];
+	float collisionPos[3];
+	int indexX = threadid * 3 + 0;
+	int indexY = threadid * 3 + 1;
+	int indexZ = threadid * 3 + 2;
+	int tetIdx0 = mapping[threadid * 2 + 0];
+	int tetIdx0x = tetIdx0 * 3 + 0;
+	int tetIdx0y = tetIdx0 * 3 + 1;
+	int tetIdx0z = tetIdx0 * 3 + 2;
+	int tetIdx1 = mapping[threadid * 2 + 1];
+	int tetIdx1x = tetIdx1 * 3 + 0;
+	int tetIdx1y = tetIdx1 * 3 + 1;
+	int tetIdx1z = tetIdx1 * 3 + 2;
+
+#ifdef OUTPUT_INFO
+	if (threadid == 0)
+	{
+		printf("vert: %f %f %f cylinder pose: %f %f %f %f %f %f\n",
+			tripositions[indexx], tripositions[indexy], tripositions[indexz],
+			cylinderpose[0], cylinderpose[1], cylinderpose[2],
+			cylinderpose[3], cylinderpose[4], cylinderpose[5]);
+		printf("vert num: %d\n", vertexnum);
+	}
+#endif
+	//将偏移向量变为单位向量
+	float shiftLength = sqrt(cylinderShift[0] * cylinderShift[0] + cylinderShift[1] * cylinderShift[1] + cylinderShift[2] * cylinderShift[2]);
+	if (shiftLength > 0.01f) {
+		cylinderShift[0] /= shiftLength;
+		cylinderShift[1] /= shiftLength;
+		cylinderShift[2] /= shiftLength;
+	}
+
+	//指定连续碰撞检测的方向
+	float moveDir[3];
+	moveDir[0] = directDir[indexX];
+	moveDir[1] = directDir[indexY];
+	moveDir[2] = directDir[indexZ];
+
+	float tetPosition[3] = { triPositions[indexX] ,triPositions[indexY] ,triPositions[indexZ] };
+	float toolMoveDir[3] = { cylinderLastPos[0] - cylinderPose[0],cylinderLastPos[1] - cylinderPose[1], cylinderLastPos[2] - cylinderPose[2] };
+	float moveDistance = tetNormal_D(toolMoveDir);
+
+	float ratio = 0.0f;
+	float newPos[3];
+	newPos[0] = cylinderPose[0] + cylinderShift[0] * ratio * radius;
+	newPos[1] = cylinderPose[1] + cylinderShift[1] * ratio * radius;
+	newPos[2] = cylinderPose[2] + cylinderShift[2] * ratio * radius;
+	float w = moveDistance / radius;
+	float enlarged_radius = radius * (1.5 - 0.5 / w);
+
+	// 计算顶点碰撞深度depth和顶点被排出到工具表面的位置collisionPos
+	float vert[3] = { triPositions[indexX], triPositions[indexY], triPositions[indexZ] };
+	float distance = -1;
+	bool collision = cylinderCollision_withDepth(cylinderPose,
+		vert, halfLength, radius, sphere_r,
+		&t, &depth, &distance, collisionNormal, collisionPos);    // 判断这个点是否发生了碰撞. collisionPos是发生了碰撞后顶点应该去的地方...
+	
+	if (distance > 1 || distance <= 0.03) {
+		return;
+	}
+
+	float deltaPos[3];
+	triVertProjectedPos[indexX] = collisionPos[0];
+	triVertProjectedPos[indexY] = collisionPos[1];
+	triVertProjectedPos[indexZ] = collisionPos[2];
+	deltaPos[0] = collisionPos[0] - triPositions[indexX];
+	deltaPos[1] = collisionPos[1] - triPositions[indexY];
+	deltaPos[2] = collisionPos[2] - triPositions[indexZ];
+	float insertionDepth = sqrt(deltaPos[0] * deltaPos[0] + deltaPos[1] * deltaPos[1] + deltaPos[2] * deltaPos[2]);
+	triInsertionDepth[threadid] = insertionDepth;    // 插入深度..
+
+	// 根据碰撞计算接触力。
+	float temp[3];
+	temp[0] = -distance * 0.02 * collisionStiffness * (collisionNormal[0] * collisionNormal[0] * deltaPos[0] + collisionNormal[0] * collisionNormal[1] * deltaPos[1] + collisionNormal[0] * collisionNormal[2] * deltaPos[2]);
+	temp[1] = -distance * 0.02 * collisionStiffness * (collisionNormal[1] * collisionNormal[0] * deltaPos[0] + collisionNormal[1] * collisionNormal[1] * deltaPos[1] + collisionNormal[1] * collisionNormal[2] * deltaPos[2]);
+	temp[2] = -distance * 0.02 * collisionStiffness * (collisionNormal[2] * collisionNormal[0] * deltaPos[0] + collisionNormal[2] * collisionNormal[1] * deltaPos[1] + collisionNormal[2] * collisionNormal[2] * deltaPos[2]);
+
+	// 把接触力施加到发生碰撞的表面三角网格和四面体网格顶点上
+	triCollisionForce[indexX] += temp[0];
+	triCollisionForce[indexY] += temp[1];
+	triCollisionForce[indexZ] += temp[2];
+	tetVertCollisionForce[tetIdx0x] += temp[0] / 2;
+	tetVertCollisionForce[tetIdx0y] += temp[1] / 2;
+	tetVertCollisionForce[tetIdx0z] += temp[2] / 2;
+	tetVertCollisionForce[tetIdx1x] += temp[0] / 2;
+	tetVertCollisionForce[tetIdx1y] += temp[1] / 2;
+	tetVertCollisionForce[tetIdx1z] += temp[2] / 2;
+
+	//计算对角元素对应的值
+	float diagx = collisionStiffness * collisionNormal[0] * collisionNormal[0];
+	float diagy = collisionStiffness * collisionNormal[1] * collisionNormal[1];
+	float diagz = collisionStiffness * collisionNormal[2] * collisionNormal[2];
+	triCollisionDiag[indexX] += diagx;
+	triCollisionDiag[indexY] += diagy;
+	triCollisionDiag[indexZ] += diagz;
+	tetVertCollisionDiag[tetIdx0x] += diagx;
+	tetVertCollisionDiag[tetIdx0y] += diagy;
+	tetVertCollisionDiag[tetIdx0z] += diagz;
+	tetVertCollisionDiag[tetIdx1x] += diagx;
+	tetVertCollisionDiag[tetIdx1y] += diagy;
+	tetVertCollisionDiag[tetIdx1z] += diagz;
+
+	//设置标志位
+	isCollide[threadid] = 1;
+	atomicAdd(collisionNumPtr, 1);
+}
+
+
+
+
 int runDeviceCalculateContact(float k_c)
 {
 	int  threadNum = 512;

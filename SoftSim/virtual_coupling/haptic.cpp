@@ -108,6 +108,11 @@ void Haptic::HapticCollision(CollisionMode mode)
 		// 根据碰撞结果计算工具上的接触力
 		runDeviceCalculateContact(m_kc);
 	}
+	else if (mode == GRAB_MODE) {
+		runHapticCollisionCylinder_Merged_Grab(m_radius, m_cylinderLength, m_collisionStiffness, m_kc, 0, m_sphereRadius);
+		// 根据碰撞结果计算工具上的接触力
+		runDeviceCalculateContact(m_kc);
+	}
 }
 
 void Haptic::HapticStep() // 以1000Hz运行
@@ -121,12 +126,6 @@ void Haptic::HapticStep() // 以1000Hz运行
 	//清除碰撞信息
 	runClearCollisionMU();
 
-	if (m_button_pressed > 0)
-	{
-		// 此处执行按键按下的操作
-		cout << "button pressed" << endl;
-	}
-
 	QueryPerformanceFrequency(&qg_NFreq);
 	QueryPerformanceCounter(&qg_T1);
 	LARGE_INTEGER T0, T1, T2;
@@ -136,7 +135,13 @@ void Haptic::HapticStep() // 以1000Hz运行
 	for (int i = 0; i < 1; i++) {
 		QueryPerformanceCounter(&T0);
 		//碰撞检测
-		HapticCollision(CYLINDER_MERGE_MODE);
+		if (m_button_pressed > 0) {
+			HapticCollision(GRAB_MODE);
+		}
+		else {
+			HapticCollision(CYLINDER_MERGE_MODE);
+		}
+		
 		QueryPerformanceCounter(&T1);
 		cd_time += T1.QuadPart - T0.QuadPart;
 		// 求解工具位姿
