@@ -101,8 +101,6 @@ void Solver::SolverInit() {
 		{
 			printf("AddFixedPoint two-objects\n");
 			AddFixedPoint(0, 3.75, 0, 4.4);
-
-			// printf("upper: %d, lower: %d\n\n", m_tetUpperIndex.size(), m_tetLowerIndex.size());
 		}
 		// Add extra spring...
 		AddExtraSpring();
